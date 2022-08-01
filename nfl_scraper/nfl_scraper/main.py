@@ -1,6 +1,6 @@
-import nfl_scraper.user_login as user_login
+from user_login import open_main_page
 def main():
-    user_login.main_page()
+    open_main_page()
     return 1
 
 if __name__ == "__main__":
