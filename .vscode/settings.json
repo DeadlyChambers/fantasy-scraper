@@ -1,0 +1,12 @@
+{
+    "pythonTestExplorer.testFramework": "pytest",
+    "python.languageServer": "Pylance",
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintPath": "/home/shane/.local/share/virtualenvs/fantasy-scraper-rxHdnTlb/bin/pylint",
+    "python.pipenvPath": "/home/shane/.local/bin/pipenv",
+    "python.poetryPath": "/home/shane/.local/bin/poetry",
+    "python.defaultInterpreterPath": "/home/shane/.local/share/virtualenvs/fantasy-scraper-rxHdnTlb/bin/python",
+    "python.testing.pytestPath": "/home/shane/.local/share/virtualenvs/fantasy-scraper-rxHdnTlb/bin/pytest",
+    "python.testing.pytestEnabled": true,
+    "python.analysis.typeCheckingMode": "basic"
+}
