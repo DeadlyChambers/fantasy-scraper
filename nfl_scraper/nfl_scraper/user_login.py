@@ -1,7 +1,13 @@
-#This will not run on online IDE
+# This will not run on online IDE
+# pylint: disable=invalid-name
+# pylint: disable=consider-using-enumerate
 import json
-from time import time
+from operator import contains
 import requests
+from nfl_scraper.nfl_models import Game, League
+from nfl_scraper.nfl_models import Team
+from nfl_scraper.nfl_models import Championship
+from nfl_scraper.nfl_models import Season
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -9,168 +15,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-class League:
-    """_summary_
-    """
-    def __init__(self, league_name, league_id):
-        self.seasons = {}
-        self.league_name = league_name
-        self.id = league_id
-    def get_season(self, year):
-        """_summary_
-
-        Args:
-            year (_type_): _description_
-
-        Returns:
-            _type_: _description_
-        """
-        return self.seasons[year]
-    def update_season(self, season):
-        """_summary_
-
-        Args:
-            season (_type_): _description_
-        """
-        self.seasons[season.year] = season
-    def get_team(self, id, year = None):
-        """_summary_
-
-        Args:
-            id (_type_): _description_
-            year (_type_, optional): _description_. Defaults to None.
-
-        Returns:
-            _type_: _description_
-        """
-        if year is not None and self.seasons[year]:
-            if id in self.seasons[year].teams:
-                return dict(self.seasons[year].teams[id])
-            else:
-                print(f"Team with {id} in year {year} does not exist")
-        elif year is None:
-            team_seasons = dict()
-            for season in self.seasons:
-                if season.teams[id]:
-                    team_seasons[season.id] = season.teams[id]
-            return team_seasons
-        else:
-            print(f"Team with {id} was not found in any league")
-                
-class Team:
-    """_summary_
-    """
-    def __init__(self, id, name):
-        self.name = name
-        self.id = id
-        self.owner=""
-        self.championships = {}
-        self.total_points = 0
-        self.wins = 0
-        self.losses = 0
-        self.rank = 0
-        self.ties = 0
-    def add_ship(self, championship):
-        """_summary_
-
-        Args:
-            championship (_type_): _description_
-        """
-        self.championships[championship.year] = championship
-    def add_total_points(self, points):
-        """_summary_
-
-        Args:
-            points (_type_): _description_
-        """
-        self.total_points = points
-    def add_record(self, win, loss, tie):
-        """_summary_
-
-        Args:
-            win (_type_): _description_
-            loss (_type_): _description_
-            tie (_type_): _description_
-        """
-        self.wins = win
-        self.losses = loss
-        self.ties = tie
-    def add_rank(self, rank):
-        """_summary_
-
-        Args:
-            rank (_type_): _description_
-        """
-        self.rank = rank
-        
-class Season:
-    """_summary_
-    """
-    def __init__(self, year, team):
-        self.year = year
-        self.teams = dict()
-        self.teams[team.id]=team
-        self.highest_score = 0
-        self.highest_score_team_id = 0
-        self.highest_score_week = 0
-        self.points_leader_total = 0
-        self.points_leader_team_id = 0
-        self.highest_player_team_id = 0
-        self.highest_player_points = 0
-        self.highest_player_week = 0
-        self.highest_player_name = ""
-        self.highest_player_pos_team = ""
-    def add_team(self, team):
-        """_summary_
-
-        Args:
-            team (_type_): _description_
-        """
-        self.teams[team.id]=team
-    def set_highest_score(self, team, score, week):
-        """_summary_
-
-        Args:
-            team (_type_): _description_
-            score (_type_): _description_
-            week (_type_): _description_
-        """
-        self.highest_score = score
-        self.highest_score_team_id = team.id
-        self.highest_score_week = week
-    def set_points_leader(self, team, points):
-        """_summary_
-
-        Args:
-            team (_type_): _description_
-            points (_type_): _description_
-        """
-        self.points_leader_total = points
-        self.points_leader_team_id = team.id
-    def set_highest_player_score(self, team, points, week, player_name, pos_team):
-        """_summary_
-
-        Args:
-            team (_type_): _description_
-            points (_type_): _description_
-            week (_type_): _description_
-            player_name (_type_): _description_
-            pos_team (_type_): _description_
-        """
-        self.highest_player_team_id = team.id
-        self.highest_player_points = points
-        self.highest_player_week = week
-        self.highest_player_name = player_name
-        self.highest_player_pos_team = pos_team
-class Championship:
-    """_summary_
-    """
-    def __init__(self, year):
-        self.year = year
-
-username = "email@gmail.com"
-password = "password"
-leagueid = "123456"
+#TODO VERY HIGH Move the models up to be shared
+#TODO HIGH Add Output(json|excel) method to models
+#TODO MED Make these inputs
+#TODO LOW Organize the methods a little better
+#TODO VERY LOW I sort of want to utilize the objects in a web app for data manipulation/query
+USERNAME = "myemail@gmail.com"
+PASSWORD = "mypassword"
+LEAGUE_ID = "123456"
+#This name isnt' used for matching, so it can be anythin
+LEAGUE_NAME = "MileHigh"
 def get_driver():
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
@@ -184,47 +38,182 @@ def open_main_page():
     driver.get(URL)
     print(driver.title)
     email = driver.find_element("xpath","//input[@type='email']")
-    email.send_keys(username)
+    email.send_keys(USERNAME)
     passw = driver.find_element("xpath","//input[@type='password']")
-    passw.send_keys(password)
+    passw.send_keys(PASSWORD)
     button = WebDriverWait(driver, 100).until(EC.element_to_be_clickable((By.XPATH, "//div[@role='button' and @aria-label='Sign In button']")))
     button.click()
-    league = League("MileHigh", leagueid)
+    league = League(LEAGUE_NAME, LEAGUE_ID)
     driver.implicitly_wait(5)
     print(driver.title)
-    almanac(driver, league)
-    driver.implicitly_wait(5)
-    #page_source = driver.page_source
-    #soup = BeautifulSoup(page_source, 'html5lib')
-    #print(soup.prettify())
-    
-def almanac(driver, league):
     URL = f"https://fantasy.nfl.com/league/{league.id}/history"
     driver.get(URL)
-    #league champ
-    #for y in range(len(winner_tables)):
-    #table_text = winner_tables[0].get_attribute('innerHTML')
+    ships(driver, league)
+    single_game_points(driver, league)
+    single_player_points_leader(driver, league)
+    points_leader(driver, league)
+    add_teams_to_seasons(driver, league)
+    get_schedules_and_rosters(driver, league)
+    add_playoffs(driver, league)
+    driver.implicitly_wait(5)
     
-    #winner_rows = winner_tables[0].get().childNodes().find_elements("xpath","/tbody//tr")
+def ships(driver, league):
     winner_rows = driver.find_elements("xpath","/html/body/div[1]/div[3]/div/div[1]/div/div[2]/div/div/div[1]/table/tbody/tr")
     print("found")
     print(str(len(winner_rows)))
-    
     for x in range(len(winner_rows)):
-        year_el = winner_rows[x].find_element("xpath",".//td[1]")
-        year = year_el.text
-        team_a = winner_rows[x].find_element("xpath",".//td[3]/div/a[2]")
-        team_name = team_a.text
-        team_id = team_a.get_attribute("href").split('/')[-1]
+        year = winner_rows[x].find_element("xpath",".//td[1]").text
+        team = get_team(winner_rows[x], "3", [])
         ship = Championship(year)
-        team = Team(team_id, team_name)
         team.add_ship(ship)
         season = Season(year, team)
         league.update_season(season)
-        print(f"Year:{year} Name:{team_name} Id:{team_id}")
+        print(f"Year:{year} Name:{team.name} Id:{team.id}")
     print(driver.title)
-    print(json.dumps(league))
     
+def single_game_points(driver, league):
+    winner_rows = driver.find_elements("xpath","/html/body/div[1]/div[3]/div/div[1]/div/div[2]/div/div/div[2]/table/tbody/tr")
+    print("found")
+    print(str(len(winner_rows)))
+    for x in range(len(winner_rows)):
+        year = winner_rows[x].find_element("xpath",".//td[1]").text
+        week = winner_rows[x].find_element("xpath",".//td[2]").text
+        points = winner_rows[x].find_element("xpath",".//td[4]").text
+        season = league.seasons[year]
+        team = get_team(winner_rows[x], "3", season)
+        season.set_highest_score(team.id, points, week)
+        league.update_season(season)
+        print(f"Team:{team.name} Week:{season.highest_score_week} Score:{season.highest_score}")
+    print(driver.title)
+
+def get_schedules_and_rosters(driver, league):
+    for year in league.seasons:
+        season = league.seasons[year]
+        for teamid in season.teams:
+            url = "https://fantasy.nfl.com/league/"+league.id+"/history/"+season.year+"/schedule?standingsTab=schedule&scheduleType=team&leagueId="+league.id+"&scheduleDetail="+teamid
+            driver.get(url)
+            driver.implicitly_wait(3)
+            team = season.teams[teamid]
+            game_rows = driver.find_element("xpath", "/table/tbody/tr")
+            for x in range(len(game_rows)):
+                game_row = game_rows[x]
+                week = game_row.find_element("xpath", ".//td[1]").text
+                opp_team = get_team(game_row, "2", season)
+                score = game_row.find_element("xpath", ".//td[3]/a/em[1]").text
+                opponent_score = game_row.find_element("xpath", ".//td[3]/a/em[2]").text
+                team.add_game(Game(week, team.name, team.id, score, opp_team.id, opp_team.name, opponent_score))
+
+def single_player_points_leader(driver, league):
+    winner_rows = driver.find_elements("xpath","/html/body/div[1]/div[3]/div/div[1]/div/div[2]/div/div/div[3]/table/tbody/tr")
+    print("found")
+    print(str(len(winner_rows)))
+    for x in range(len(winner_rows)):
+        year = winner_rows[x].find_element("xpath",".//td[1]").text
+        week = winner_rows[x].find_element("xpath",".//td[2]").text
+        points = winner_rows[x].find_element("xpath",".//td[5]").text
+        player_name = winner_rows[x].find_element("xpath",".//td[4]/div/a").text
+        player_pos_team = winner_rows[x].find_element("xpath",".//td[4]/div/em").text
+        season = league.seasons[year]
+        team = get_team(winner_rows[x], "3", season)
+        season.set_highest_player_score(team.id, points, week, player_name, player_pos_team)
+        league.update_season(season)
+        print(f"Team:{team.name} Week:{week} Score:{points} PlayerName: {player_name} PlayerPos: {player_pos_team}")
+    print(driver.title)
+
+
+def points_leader(driver, league):
+    winner_rows = driver.find_elements("xpath","/html/body/div[1]/div[3]/div/div[1]/div/div[2]/div/div/div[4]/table/tbody/tr")
+    print("found")
+    print(str(len(winner_rows)))
+    for x in range(len(winner_rows)):
+        year = winner_rows[x].find_element("xpath",".//td[1]").text
+        points = winner_rows[x].find_element("xpath",".//td[4]").text
+        season = league.seasons[year]
+        team = get_team(winner_rows[x], "3", season)
+        
+        season.set_points_leader(team.id, points)
+        league.update_season(season)
+        print(f"Team:{team.name} Score:{season.highest_score}")
+    print(driver.title)
+
+def add_playoffs(driver, league):
+    for year in league.seasons:
+        season = league.seasons[year]
+        url = "https://fantasy.nfl.com/league/"+league.id+"/history/"+year+"/playoffs"
+        driver.get(url)
+        playoff_weeks = driver.find_elements("xpath","/ul[@class='playoffContent']/li")
+        for x in range(len(playoff_weeks)):
+            playoff_week = playoff_weeks[x]
+            week = playoff_week.find_element("xpath", ".//li[1]/h4").text.remove("Week").strip()
+            team_row = playoff_week.find_elements("xpath", ".//li[1]/div[1]")
+            team = get_team(team_row, "1", season, container = "div")
+            score = team_row.find_element("xpath", ".//li[1]/div[1]/div[2]").text
+            opp_team_row = playoff_week.find_elements("xpath", ".//li[1]/div[2]")
+            opp_team = get_team(opp_team_row, "1", season, container = "div")
+            opp_score = opp_team_row.find_element("xpath", ".//li[1]/div[1]/div[2]").text
+            playoff_game = Game(week, team.name, team.id, score, opp_team.name, opp_team.id, opp_score)
+            season.add_playoff_game(playoff_game)
+        league.update_season(season)
+
+def add_teams_to_seasons(driver, league):
+    for year in league.seasons:
+        season = league.seasons[year]
+        url = "https://fantasy.nfl.com/league/"+league.id+"/history/"+year+"/standings?historyStandingsType=regular"
+        count_divisions = -1
+        driver.get(url)
+        driver.implicitly_wait(3)
+        try:
+            divisions = driver.find_elements("xpath","/html/body/div[1]/div[3]/div/div[1]/div/div[5]/div/div/div[contains(@class,'hasDivisions')]")
+            count_divisions = len(divisions) - 1
+            if count_divisions == -1:
+                count_divisions = 1
+        except Exception:
+            print("add_teams_to_seasons potential error: "+year)
+        
+        for division_index in range(count_divisions):
+            if count_divisions == 1:
+                rows = driver.find_elements("xpath","/html/body/div[1]/div[3]/div/div[1]/div/div[5]/div/div/div[1]/table/tbody/tr")
+                division = ""
+            else:
+                #Selenium doesn't zero index..gross
+                rows = driver.find_elements("xpath","/html/body/div[1]/div[3]/div/div[1]/div/div[5]/div/div/div["+str(division_index+2)+"]/table/tbody/tr")
+                division = driver.find_element("xpath","/html/body/div[1]/div[3]/div/div[1]/div/div[5]/div/div/div["+str(division_index+2)+"]/h5").text.split(':')[1].strip()
+            team_count = len(rows)
+            print("current teams: " +str(len(season.teams)))
+            for x in range(team_count):
+                record = rows[x].find_element("xpath",".//td[3]").text
+                points_for = rows[x].find_element("xpath",".//td[6]").text
+                points_against = rows[x].find_element("xpath",".//td[7]").text
+                team = get_team(rows[x], "2", season)
+                if team.id in season.teams:
+                    team = season.teams[team.id]
+                team.add_record(record, points_for, points_against, division)
+                season.teams[team.id] = team
+                print(f"Team:{team.name} Points for: {points_for} Points Against:{points_against} Record: {record}")
+            league.update_season(season)
+        print(driver.title)
+
+
+def get_team(row, col, season, container = "td"):
+    """Pulling the team name and id out of the expected column
+
+    Args:
+        row (_type_): _description_
+        col (_type_): _description_
+        season (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    team_a = row.find_element("xpath",".//"+container+"["+col+"]/div/a[2]")
+    team_id = team_a.get_attribute("href").split('/')[-1]
+    # Into earlier seasons the urls were a bit different
+    if "teamId=" in team_id:
+        team_id = team_id.split('teamId=')[1]
+    try:
+        return season.teams[team_id]
+    except Exception:
+        return Team(team_id, team_a.text)
 
 
 
