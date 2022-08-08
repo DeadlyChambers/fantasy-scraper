@@ -24,10 +24,20 @@ LEAGUE_ID = "123456"
 LEAGUE_NAME = "MileHigh"
 VERBOSE = True
 def debug_print(message):
+    """_summary_
+
+    Args:
+        message (_type_): _description_
+    """
     if VERBOSE is True:
         print(message)
 
 def get_driver():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
@@ -253,13 +263,14 @@ def add_teams_to_seasons(driver, league):
             team_count = len(rows)
             debug_print("current teams: " +str(len(season.teams)))
             for x in range(team_count):
+                rank = rows[x].find_element("xpath",".//td[1]").text
                 record = rows[x].find_element("xpath",".//td[3]").text
                 points_for = rows[x].find_element("xpath",".//td[6]").text
                 points_against = rows[x].find_element("xpath",".//td[7]").text
                 team = get_team(rows[x], "2", season)
                 if team.id in season.teams:
                     team = season.teams[team.id]
-                team.add_record(record, points_for, points_against, division)
+                team.add_record(record, points_for, points_against, rank, division)
                 season.teams[team.id] = team
                 debug_print(f"Team:{team.name} Points for: {points_for} Points Against:{points_against} Record: {record}")
             league.update_season(season)
@@ -299,7 +310,9 @@ def get_team_from_a(atag, season):
     except Exception:
         return Team(team_id, atag.text)
 
-def main_page():  
+def main_page():
+    """_summary_
+    """
     URL = "https://id.nfl.com/account/sign-in?authReturnUrl=https%3A%2F%2Fid.nfl.com%2Faccount"
     headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246"}
     r = requests.get(url=URL, headers=headers)

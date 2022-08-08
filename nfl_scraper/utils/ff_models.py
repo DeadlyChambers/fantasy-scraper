@@ -51,6 +51,18 @@ class Game:
     """Game
     """
     def __init__(self, week, name, id, score, opponent_id, opponent_name, opponent_score, game_type = "regular"):
+        """_summary_
+
+        Args:
+            week (_type_): _description_
+            name (_type_): _description_
+            id (_type_): _description_
+            score (_type_): _description_
+            opponent_id (_type_): _description_
+            opponent_name (_type_): _description_
+            opponent_score (_type_): _description_
+            game_type (str, optional): _description_. Defaults to "regular".
+        """
         self.week = week
         self.score = score
         self.opponent_id = opponent_id
@@ -61,6 +73,11 @@ class Game:
         self.game_type = game_type
         
     def set_playoffs(self, game_type):
+        """_summary_
+
+        Args:
+            game_type (_type_): _description_
+        """
         self.game_type = game_type
 class Team:
     """_summary_
@@ -80,6 +97,11 @@ class Team:
         self.games = dict()
         self.manager = ""
     def set_manager(self, manager):
+        """_summary_
+
+        Args:
+            manager (_type_): _description_
+        """
         self.manager = manager
     
     def add_ship(self, championship):
@@ -109,7 +131,7 @@ class Team:
         """
         game = Game(week, self.name, self.id, "0", "0", "bye", "0", "bye") #, True) #If you want to default to playoffs
         self.games[week] = game
-    def add_record(self, win_loss_tie, total_point, total_points_against, division=""):
+    def add_record(self, win_loss_tie, total_point, total_points_against, rank, division=""):
         """_summary_
 
         Args:
@@ -119,17 +141,11 @@ class Team:
         self.wins = wlt[0]
         self.losses = wlt[1]
         self.ties = wlt[2]
+        self.rank = rank
         self.total_points = total_point
         self.total_points_against = total_points_against
         self.division = division
-    def add_rank(self, rank):
-        """_summary_
 
-        Args:
-            rank (_type_): _description_
-        """
-        self.rank = rank
-        
 class Season:
     """_summary_
     """
@@ -156,12 +172,16 @@ class Season:
         """
         self.teams[team.id]=team
     def add_playoff_game(self, game):
+        """_summary_
+
+        Args:
+            game (_type_): _description_
+        """
         self.playoffs.append(game)
         #double check a_team, and b_team don't need to be updated on season
         self.teams[game.id].games[game.week].set_playoffs(game.game_type)
         self.teams[game.opponent_id].games[game.week].set_playoffs(game.game_type)
-        
-        
+
     def set_highest_score(self, team_id, score, week):
         """_summary_
 
