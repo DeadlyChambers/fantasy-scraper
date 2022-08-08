@@ -48,7 +48,9 @@ class League:
         else:
             print(f"Team with {id} was not found in any league")
 class Game:
-    def __init__(self, week, name, id, score, opponent_id, opponent_name, opponent_score):
+    """Game
+    """
+    def __init__(self, week, name, id, score, opponent_id, opponent_name, opponent_score, game_type = "regular"):
         self.week = week
         self.score = score
         self.opponent_id = opponent_id
@@ -56,6 +58,10 @@ class Game:
         self.opponent_name = opponent_name
         self.name = name
         self.id = id
+        self.game_type = game_type
+        
+    def set_playoffs(self, game_type):
+        self.game_type = game_type
 class Team:
     """_summary_
     """
@@ -72,7 +78,10 @@ class Team:
         self.ties = 0
         self.division = ""
         self.games = dict()
-        
+        self.manager = ""
+    def set_manager(self, manager):
+        self.manager = manager
+    
     def add_ship(self, championship):
         """_summary_
 
@@ -94,7 +103,12 @@ class Team:
             game (_type_): _description_
         """
         self.games[game.week] = game
-        
+    def add_bye_week(self, week):
+        """Right now this is used when catching any errors while building the schedule
+        it should be a playoff bye week, but if other games pop up under this, check it out
+        """
+        game = Game(week, self.name, self.id, "0", "0", "bye", "0", "bye") #, True) #If you want to default to playoffs
+        self.games[week] = game
     def add_record(self, win_loss_tie, total_point, total_points_against, division=""):
         """_summary_
 
@@ -143,12 +157,11 @@ class Season:
         self.teams[team.id]=team
     def add_playoff_game(self, game):
         self.playoffs.append(game)
-        a_team = self.teams[game.id]
         #double check a_team, and b_team don't need to be updated on season
-        a_team.add_game(game)
-        b_team = self.teams[game.opponent_id]
-        game_flipped = Game(game.week, b_team.name, b_team.id, game.opponent_score, a_team.name, a_team.id, a_team.score)
-        b_team.add_game(game_flipped)
+        self.teams[game.id].games[game.week].set_playoffs(game.game_type)
+        self.teams[game.opponent_id].games[game.week].set_playoffs(game.game_type)
+        
+        
     def set_highest_score(self, team_id, score, week):
         """_summary_
 

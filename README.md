@@ -33,7 +33,7 @@ poetry add bs4
 ```bash
 pipenv shell
 cd nfl_scraper
-poetry run python nfl_scraper/main.py
+poetry run python main.py
 
 # Test
 poetry run pytest

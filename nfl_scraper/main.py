@@ -1,4 +1,4 @@
-from nfl_scraper.user_login import open_main_page
+from nfl.user_login import open_main_page
 
 def main():
     """_summary_
