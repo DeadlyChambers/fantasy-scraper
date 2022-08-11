@@ -1,14 +1,13 @@
 # This will not run on online IDE
 # pylint: disable=invalid-name
 # pylint: disable=consider-using-enumerate
-import json
 from operator import contains
 import requests
 from utils.ff_models import *
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import jsonpickle
 
@@ -17,11 +16,7 @@ import jsonpickle
 #TODO MED Make username, password, league id as inputs to module call
 #TODO LOW Organize the methods a little better
 #TODO VERY LOW I sort of want to utilize the objects in a web app for data manipulation/query
-USERNAME = "myemail@gmail.com"
-PASSWORD = "password"
-LEAGUE_ID = "123456"
-#This name isnt' used for matching, so it can be anythin
-LEAGUE_NAME = "MileHigh"
+
 VERBOSE = True
 def debug_print(message):
     """_summary_
@@ -44,19 +39,20 @@ def get_driver():
     #options.add_argument('--headless')
     return webdriver.Chrome("/usr/local/bin/chromedriver", chrome_options=options)
 
-def open_main_page():
+def open_main_page(username, password, leagueid, name, verbose) -> None:
     """Running this will run the entirety of the scrap. I've been using the debugger in 
     vscode
     """
+    VERBOSE=verbose
     driver = get_driver()
     URL = "https://id.nfl.com/account/sign-in"
     driver.get(URL)
     debug_print(driver.title)
-    driver.find_element("xpath","//input[@type='email']").send_keys(USERNAME)
-    driver.find_element("xpath","//input[@type='password']").send_keys(PASSWORD)
+    driver.find_element("xpath","//input[@type='email']").send_keys(username)
+    driver.find_element("xpath","//input[@type='password']").send_keys(password)
     button = WebDriverWait(driver, 100).until(EC.element_to_be_clickable((By.XPATH, "//div[@role='button' and @aria-label='Sign In button']")))
     button.click()
-    league = League(LEAGUE_NAME, LEAGUE_ID)
+    league = League(name, leagueid)
     driver.implicitly_wait(3)
     debug_print(driver.title)
     URL = f"https://fantasy.nfl.com/league/{league.id}/history"
@@ -80,7 +76,7 @@ def open_main_page():
         write_file.write(str(jsonpickle.encode(league)))
 
     
-def ships(driver, league):
+def ships(driver, league) -> None:
     """What it is all about, yachts and champagne
 
     Args:
@@ -100,7 +96,7 @@ def ships(driver, league):
         debug_print(f"Year:{year} Name:{team.name} Id:{team.id}")
     debug_print(driver.title)
     
-def single_game_points(driver, league):
+def single_game_points(driver, league) -> None:
     """Season Single Game Point Scoring leader
 
     Args:
@@ -121,7 +117,7 @@ def single_game_points(driver, league):
         debug_print(f"Team:{team.name} Week:{season.highest_score_week} Score:{season.highest_score}")
     debug_print(driver.title)
 
-def get_schedules_and_rosters(driver, league):
+def get_schedules_and_rosters(driver, league) -> None:
     """Adding each game directly to the individual team. It would be where
     I'd probably add rosters, but not messing with it atm
 
@@ -153,7 +149,7 @@ def get_schedules_and_rosters(driver, league):
                     #Honestly this is sort of a guess, it happens in playoffs
                     team.add_bye_week(game_rows[x].find_element("xpath", ".//td[1]").text)
 
-def single_player_points_leader(driver, league):
+def single_player_points_leader(driver, league) -> None:
     """I planned on added players, but it felt like overkill. At least each season point
     scorer is recorded to the season
 
@@ -178,7 +174,7 @@ def single_player_points_leader(driver, league):
     debug_print(driver.title)
 
 
-def points_leader(driver, league):
+def points_leader(driver, league) -> None:
     """Points leader is a single team each season..unless there is a tie then
     this is f'd
 
@@ -199,7 +195,7 @@ def points_leader(driver, league):
         debug_print(f"Team:{team.name} Score:{season.highest_score}")
     debug_print(driver.title)
 
-def add_playoffs(driver, league):
+def add_playoffs(driver, league) -> None:
     """The playoffs are weird animal so made it an array of games on the season,
     and added the games to each team that played in them. Could mess up something with
     teams having exta games. Adding a boolean for isPlayoffs if that distinction needs
@@ -231,7 +227,7 @@ def add_playoffs(driver, league):
             #TODO: Consider ensuring any other games not in playoffs set as toilet bowl or something
         league.update_season(season)
 
-def add_teams_to_seasons(driver, league):
+def add_teams_to_seasons(driver, league) -> None:
     """Adding the teams individually to a season
 
     Args:
@@ -277,7 +273,7 @@ def add_teams_to_seasons(driver, league):
         debug_print(driver.title)
 
 
-def get_team(row, col, season, container = "td"):
+def get_team(row, col, season, container = "td") -> Team:
     """Pulling the team name and id out of the expected column
 
     Args:
@@ -291,7 +287,7 @@ def get_team(row, col, season, container = "td"):
     team_a = row.find_element("xpath",".//"+container+"["+col+"]/div/a[2]")
     return get_team_from_a(team_a, season)
 
-def get_team_from_a(atag, season):
+def get_team_from_a(atag, season) -> Team:
     """_summary_
 
     Args:
@@ -310,7 +306,7 @@ def get_team_from_a(atag, season):
     except Exception:
         return Team(team_id, atag.text)
 
-def main_page():
+def main_page() -> None:
     """_summary_
     """
     URL = "https://id.nfl.com/account/sign-in?authReturnUrl=https%3A%2F%2Fid.nfl.com%2Faccount"

@@ -6,6 +6,7 @@ __pycache__/
 # C extensions
 *.so
 secrets
+local.sh
 league_*.json
 
 # Distribution / packaging

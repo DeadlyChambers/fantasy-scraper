@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "nfl_scraper"
+version = "1.0.2"
+description = "Creating a scraper for multiple fantasy football sites"
+authors = ["DeadlyChambers <shanechambers85@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+include = ["CHANGELOG.md"]
+packages = [
+    { include = "nfl_scraper", from = "src" }
+]
+keywords = ["nfl", "nfl_scraper", "fantasy", "football", "myfantasy"]
+repository = "https://github.com/DeadlyChambers/fantasy-scraper"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.28.1"
+html5lib = "^1.1"
+bs4 = "^0.0.1"
+selenium = "^4.3.0"
+jsonpickle = "^2.2.0"
+prompt-toolkit = "^3.0.30"
+importlib-metadata = { version = "^4.4", python = "<3.10" }
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+mypy = ">=0.960"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.issort]
+force_single_line = true
+combine_as_imports = true
+src_paths = ["src", "tests"]
+extend_skip = ["setup.py"]
+
+
+[tool.mypy]
+files = "src"
+mypy_path = "src"
+namespace_packages = true
+explicit_package_bases = true
+show_error_codes = true
+strict = true
+enable_error_code = [
+    "ignore-without-code",
+    "redundant-expr",
+    "truthy-bool",
+]
+
+  

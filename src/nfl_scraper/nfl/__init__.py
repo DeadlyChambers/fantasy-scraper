@@ -1,7 +1,7 @@
 from unicodedata import name
 
-from nfl.user_login import *
+from nfl import user_login
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 __all__ = ["user_login"]

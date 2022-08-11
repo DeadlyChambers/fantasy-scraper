@@ -8,5 +8,6 @@
     "python.defaultInterpreterPath": "/home/shane/.local/share/virtualenvs/fantasy-scraper-rxHdnTlb/bin/python",
     "python.testing.pytestPath": "/home/shane/.local/share/virtualenvs/fantasy-scraper-rxHdnTlb/bin/pytest",
     "python.testing.pytestEnabled": true,
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "terminalAllInOne.disableAllKeybindings": true
 }
