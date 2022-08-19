@@ -3,6 +3,11 @@ Trying to scrape all data from our fantasy league with NFL.com. Since we are mov
 
 ## Simple Usage
 
+First off you will need to ensure you have chromedriver installed in your path [StackOverflow](https://stackoverflow.com/a/40556092/1248536).
+You should be able to set your path with `PATH="$PATH:/usr/local/bin/chromedriver"` or where ever your chromedriver is. If you
+can `which chromedriver` then you are good.
+
+
 To use the package, you should be able to pull your league id from NFL.com, email, you know your password, and whatever you want to use for a name of the
 league (this does not need to be the actually name of the league)
 

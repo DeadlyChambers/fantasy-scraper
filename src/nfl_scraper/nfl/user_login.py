@@ -37,7 +37,7 @@ def get_driver():
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
     #options.add_argument('--headless')
-    return webdriver.Chrome("/usr/local/bin/chromedriver", chrome_options=options)
+    return webdriver.Chrome(chrome_options=options)
 
 def open_main_page(username, password, leagueid, name, verbose) -> None:
     """Running this will run the entirety of the scrap. I've been using the debugger in 
