@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "nfl_scraper"
-version = "1.0.2"
+version = "1.0.4"
 description = "Creating a scraper for multiple fantasy football sites"
 authors = ["DeadlyChambers <shanechambers85@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 include = ["CHANGELOG.md"]
+exclude = ["src/nfl_scraper/*.json"]
 packages = [
     { include = "nfl_scraper", from = "src" }
 ]
